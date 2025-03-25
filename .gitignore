@@ -27,7 +27,3 @@ dist-ssr
 .env
 .env.local
 .env.*.local
-
-# Development environment
-.bolt/
-.bolt/*
