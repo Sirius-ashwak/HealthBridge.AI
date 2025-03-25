@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { MessageSquare, Phone, Pill, Car, Heart, Send, Loader2, CheckCircle, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { analyzeSymptoms } from './services/aiService';
 
 interface ChatMessage {
@@ -57,7 +59,7 @@ function ChatInterface({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl h-[700px] flex flex-col shadow-2xl">
+      <div className="bg-white rounded-xl w-full max-w-3xl h-[700px] flex flex-col shadow-2xl">
         <div className="p-4 border-b flex justify-between items-center bg-indigo-50 rounded-t-xl">
           <div className="flex items-center gap-2">
             <Heart className="h-6 w-6 text-indigo-600" />
@@ -70,13 +72,35 @@ function ChatInterface({ onClose }: { onClose: () => void }) {
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.isAI ? 'justify-start' : 'justify-end'}`}>
-              <div className={`rounded-2xl px-6 py-3 max-w-[85%] shadow-sm ${
+              <div className={`rounded-2xl px-6 py-3 max-w-[90%] shadow-sm ${
                 msg.isAI 
                   ? 'bg-white border border-gray-200' 
                   : 'bg-indigo-600 text-white'
               }`}>
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {msg.text}
+                <div className={`prose ${!msg.isAI && 'text-white'} max-w-none text-sm leading-relaxed markdown-content`}>
+                  {msg.isAI ? (
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({node, ...props}) => <h1 className="text-xl font-bold my-2" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-lg font-bold my-2" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-md font-bold my-2" {...props} />,
+                        h4: ({node, ...props}) => <h4 className="text-base font-bold my-2" {...props} />,
+                        p: ({node, ...props}) => <p className="my-2" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc ml-4 my-2" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal ml-4 my-2" {...props} />,
+                        li: ({node, ...props}) => <li className="my-1" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-bold text-indigo-900" {...props} />,
+                        em: ({node, ...props}) => <em className="italic" {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 my-2 italic" {...props} />,
+                        code: ({node, ...props}) => <code className="bg-gray-100 px-1 rounded" {...props} />,
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
+                  ) : (
+                    <p>{msg.text}</p>
+                  )}
                 </div>
                 <div className={`mt-2 text-xs ${msg.isAI ? 'text-gray-500' : 'text-indigo-100'}`}>
                   {msg.isAI ? 'AI Assistant' : 'You'}
